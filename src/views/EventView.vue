@@ -214,25 +214,63 @@
 
       <template v-slot:item.actions="{ item }">
         <v-col cols="auto" class="d-flex justify-center">
-          <v-tooltip
-            location="bottom"
-          >
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-delete"
-                color="orange-darken-2"
-                size="small"
-                style="color: #000 !important;"
-                class="mx-1"
-              >
-                <v-icon color="grey-darken-4">
-                    mdi-delete
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Excluir Evento</span>
-          </v-tooltip>
+            <v-tooltip
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  icon="mdi-download"
+                  color="orange-darken-2"
+                  size="small"
+                  style="color: #000 !important;"
+                  class="mx-1"
+                >
+                  <v-icon color="grey-darken-4">
+                      mdi-download
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Baixar Dados para Emissão dos Certificados</span>
+            </v-tooltip>
+            <v-tooltip
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  icon="mdi-certificate"
+                  color="orange-darken-2"
+                  size="small"
+                  style="color: #000 !important;"
+                  class="mx-1"
+                >
+                  <v-icon color="grey-darken-4">
+                      mdi-certificate
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Atualizar Status dos Certificados</span>
+            </v-tooltip>
+            <v-tooltip
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  icon="mdi-delete"
+                  color="orange-darken-2"
+                  size="small"
+                  style="color: #000 !important;"
+                  class="mx-1"
+                >
+                  <v-icon color="grey-darken-4">
+                      mdi-delete
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Excluir Evento</span>
+            </v-tooltip>
         </v-col>
       </template>
       </v-data-table>

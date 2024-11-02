@@ -5,6 +5,8 @@ import FormsView from '@/views/FormsView.vue'
 import ParticipantView from '@/views/ParticipantView.vue'
 import EventView from '@/views/EventView.vue'
 import LoginView from '@/views/LoginView.vue'
+import ExternFormView from '@/views/ExternFormView.vue'
+import ExternFormResultView from '@/views/ExternFormResultView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +45,16 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/form',
+      name: 'form',
+      component: ExternFormView,
+    },
+    {
+      path: '/results',
+      name: 'results',
+      component: ExternFormResultView,
     },
   ]
 })

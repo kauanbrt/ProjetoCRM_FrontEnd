@@ -6,7 +6,7 @@ export const STATUS_NAO_ENVIADO = 3;
 
 //Tipos Formulario
 export const F_TIPO_FEEDBACK = 1;
-export const F_TIPO_PARTICIPANTE = 2;
+export const F_TIPO_CADASTRO = 2;
 
 //Status Formulario
 export const F_STATUS_DESATIVADO = 0;

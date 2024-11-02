@@ -1,6 +1,7 @@
 <script>
-  import { F_TIPO_FEEDBACK, F_TIPO_PARTICIPANTE, F_STATUS_ATIVO, F_STATUS_DESATIVADO } from '@/constants/index';
+  import { F_TIPO_FEEDBACK, F_TIPO_CADASTRO, F_STATUS_ATIVO, F_STATUS_DESATIVADO } from '@/constants/index';
   import Status from '@/components/Status.vue';
+  import router from '@/router';
 
   export default {
     name: 'FormsView',
@@ -13,6 +14,17 @@
         search: '',
         dialog: false,
         allStatusTemplate: [],
+        tiposFormulario: [
+          { title: 'Cadastro', value: F_TIPO_CADASTRO },
+          { title: 'Feedback', value: F_TIPO_FEEDBACK },
+        ],
+        allEventos: [
+          { title: 'Evento 1', value: 1 },
+          { title: 'Evento 2', value: 2 },
+          { title: 'Evento 3', value: 3 },
+          { title: 'Evento 4', value: 4 },
+          { title: 'Evento 5', value: 5 },
+        ],
         items: [
           {
             formulario_nome: 'Feedback dos Participantes',
@@ -85,7 +97,7 @@
                 color: "primary"
             }
           
-          case F_TIPO_PARTICIPANTE:
+          case F_TIPO_CADASTRO:
             return { 
                 text: "Cadastro",
                 icon: "mdi-account-plus",
@@ -101,6 +113,9 @@
         
       }
     },
+    viewResults(){
+      router.push('/results');
+    }
   },
   created(){
     this.getAllStatusTemplate();
@@ -151,22 +166,27 @@
                 <v-row dense>
                   <v-col
                     cols="12"
-                    sm="6"
                   >
-                    <v-text-field
-                      label="RA*"
-                      required
-                    ></v-text-field>
+                    <v-select
+                      label="Tipo*"
+                      :items="tiposFormulario"
+                      item-title="title"
+                      item-value="value"
+                    >
+                    </v-select>
                   </v-col>
-
+                </v-row>
+                <v-row dense>
                   <v-col
                     cols="12"
-                    sm="6"
                   >
-                    <v-text-field
+                    <v-select
                       label="Evento*"
-                      required
-                    ></v-text-field>
+                      :items="allEventos"
+                      item-title="title"
+                      item-value="value"
+                    >
+                    </v-select>
                   </v-col>
                 </v-row>
 
@@ -212,27 +232,7 @@
       </template>
 
       <template v-slot:item.actions="{ item }">
-        <v-col cols="auto" class="d-flex justify-center">
-          <v-tooltip
-            location="bottom"
-            v-if="item.formulario_status == F_STATUS_ATIVO"
-          >
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-file"
-                color="orange-darken-2"
-                size="small"
-                style="color: #000 !important;"
-                class="mx-1"
-              >
-                <v-icon color="grey-darken-4">
-                    mdi-file-document-remove
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Desativar Formulário</span>
-          </v-tooltip>
+        <v-col cols="auto" class="d-flex justify-start">
           <v-tooltip
             location="bottom"
           >
@@ -244,13 +244,14 @@
                 size="small"
                 style="color: #000 !important;"
                 class="mx-1"
+                @click="viewResults"
               >
                 <v-icon color="grey-darken-4">
                     mdi-eye
                 </v-icon>
               </v-btn>
             </template>
-            <span>Visualizar Resultados</span>
+            <span>Visualizar Respostas</span>
           </v-tooltip>
           <v-tooltip
             location="bottom"
@@ -271,18 +272,28 @@
             </template>
             <span>Excluir Formulário</span>
           </v-tooltip>
+          <v-tooltip
+            location="bottom"
+            v-if="item.formulario_status == F_STATUS_ATIVO"
+          >
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-file"
+                color="orange-darken-2"
+                size="small"
+                style="color: #000 !important;"
+                class="mx-1"
+              >
+                <v-icon color="grey-darken-4">
+                    mdi-file-document-remove
+                </v-icon>
+              </v-btn>
+            </template>
+            <span>Desativar Formulário</span>
+          </v-tooltip>
         </v-col>
       </template>
-      
-        <!-- <template v-slot:item.rating="{ item }">
-          <v-rating
-            :model-value="item.rating"
-            color="orange-darken-2"
-            density="compact"
-            size="small"
-            readonly
-          ></v-rating>
-        </template> -->
       </v-data-table>
     </v-card>
 </template>

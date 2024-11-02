@@ -1,6 +1,6 @@
 <script>
 
-import { useAuthStore } from '@/stores/counter';
+import { useAuthStore } from '@/stores/authStore';
   export default {
     name: 'NavigationDrawer',
     data () {

@@ -60,12 +60,12 @@
     methods:{
       headers(){
         return [
-          { title: 'Nome',                     key: 'nome',                     align: 'start' },
-          { title: 'Email',                    key: 'email',                    align: 'start' },
-          { title: 'RA',                       key: 'ra',                       align: 'start' },
-          { title: 'Evento',                   key: 'evento',                   align: 'start' },
-          { title: 'Status do Certificado',    key: 'statusCertificado',        align: 'start' },
-          { title: '',                         key: 'actions',                  align: 'start' },
+          { title: 'Nome',                            key: 'nome',                     align: 'start' },
+          { title: 'Email',                           key: 'email',                    align: 'start' },
+          { title: 'RA',                              key: 'ra',                       align: 'start' },
+          { title: 'Eventos',                         key: 'evento',                   align: 'start' },
+          { title: 'Status do Último Certificado',    key: 'statusCertificado',        align: 'start' },
+          { title: '',                                key: 'actions',                  align: 'start' },
         ]
       },
       getAllStatusTemplate(){
@@ -220,17 +220,17 @@
             <template v-slot:activator="{ props }">
               <v-btn
                 v-bind="props"
-                icon="mdi-certificate"
+                icon="mdi-pencil"
                 color="orange-darken-2"
                 size="small"
                 style="color: #000 !important;"
               >
                 <v-icon color="grey-darken-4">
-                    mdi-certificate
+                    mdi-pencil
                 </v-icon>
               </v-btn>
             </template>
-            <span>Emitir Certificado</span>
+            <span>Editar Participante</span>
           </v-tooltip>
           <v-tooltip
             location="bottom"

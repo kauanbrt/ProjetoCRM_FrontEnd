@@ -1,5 +1,5 @@
 <script>
-import { useAuthStore } from '@/stores/counter';
+import { useAuthStore } from '@/stores/authStore';
 import router from '@/router';
 export default {
   name: 'LoginView',

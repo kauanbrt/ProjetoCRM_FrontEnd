@@ -258,6 +258,25 @@
               <template v-slot:activator="{ props }">
                 <v-btn
                   v-bind="props"
+                  icon="mdi-pencil"
+                  color="orange-darken-2"
+                  size="small"
+                  style="color: #000 !important;"
+                  class="mx-1"
+                >
+                  <v-icon color="grey-darken-4">
+                      mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Editar Evento</span>
+            </v-tooltip>
+            <v-tooltip
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
                   icon="mdi-delete"
                   color="orange-darken-2"
                   size="small"

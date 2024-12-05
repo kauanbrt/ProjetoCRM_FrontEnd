@@ -83,6 +83,13 @@ export default {
                 <v-col
                     cols="12"
                 >
+                    <v-checkbox label="Não sou aluno da UTFPR"></v-checkbox>
+                </v-col>
+            </v-row>
+            <v-row dense>
+                <v-col
+                    cols="12"
+                >
                     <v-text-field
                         label="RA*"
                         required

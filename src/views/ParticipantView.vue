@@ -16,6 +16,7 @@
           {
             nome: 'João Silva',
             email: 'email@email.com',
+            telefone: '99999-9999',
             ra: 9999999,
             evento: 'Evento 1',
             statusCertificado: 1,
@@ -23,6 +24,7 @@
           {
             nome: 'Pedro Moraes',
             email: 'email@email.com',
+            telefone: '99999-9999',
             ra: 9999999,
             evento: 'Evento 1',
             statusCertificado: 0,
@@ -30,6 +32,7 @@
           {
             nome: 'Laura Santana',
             email: 'email@email.com',
+            telefone: '99999-9999',
             ra: 9999999,
             evento: 'Evento 2',
             statusCertificado: 0,
@@ -37,6 +40,7 @@
           {
             nome: 'Maria Eduarda',
             email: 'email@email.com',
+            telefone: '99999-9999',
             ra: 9999999,
             evento: 'Evento 3',
             statusCertificado: 1,
@@ -44,6 +48,7 @@
           {
             nome: 'Luis Felipe',
             email: 'email@email.com',
+            telefone: '99999-9999',
             ra: 9999999,
             evento: 'Evento 2',
             statusCertificado: 0,
@@ -62,6 +67,7 @@
         return [
           { title: 'Nome',                            key: 'nome',                     align: 'start' },
           { title: 'Email',                           key: 'email',                    align: 'start' },
+          { title: 'Telefone',                        key: 'telefone',                 align: 'start' },
           { title: 'RA',                              key: 'ra',                       align: 'start' },
           { title: 'Eventos',                         key: 'evento',                   align: 'start' },
           { title: 'Status do Último Certificado',    key: 'statusCertificado',        align: 'start' },
@@ -150,6 +156,26 @@
                   >
                     <v-text-field
                       label="Nome*"
+                      required
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
+                    <v-text-field
+                      label="Email*"
+                      required
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
+                    <v-text-field
+                      label="Telefone*"
                       required
                     ></v-text-field>
                   </v-col>

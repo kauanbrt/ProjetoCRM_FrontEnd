@@ -57,14 +57,14 @@
       switch (statusId) {
         case STATUS_NAO_ENVIADO:
           return { 
-              text: "Não Enviado",
+              text: "Não Emitido",
               icon: "mdi-label",
               color: "error"
           }
         
         case STATUS_ENVIADO:
           return { 
-              text: "Enviado",
+              text: "Emitido",
               icon: "mdi-label",
               color: "success"
           }

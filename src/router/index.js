@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 import HomeView from '../views/HomeView.vue'
 import CertificateView from '../views/CertificateView.vue'
 import FormsView from '@/views/FormsView.vue'
@@ -19,27 +21,42 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: EventView
+      component: EventView,
+      meta: {
+        auth: true
+      }
     },
     {
       path: '/certificates',
       name: 'certificates',
       component: CertificateView,
+      meta: {
+        auth: true
+      }
     },
     {
       path: '/forms',
       name: 'forms',
       component: FormsView,
+      meta: {
+        auth: true
+      }
     },
     {
       path: '/participants',
       name: 'participants',
       component: ParticipantView,
+      meta: {
+        auth: true
+      }
     },
     {
       path: '/events',
       name: 'events',
       component: EventView,
+      meta: {
+        auth: true
+      }
     },
     {
       path: '/login',
@@ -47,16 +64,54 @@ const router = createRouter({
       component: LoginView,
     },
     {
+      path: '/results',
+      name: 'results',
+      component: ExternFormResultView,
+      meta: {
+        auth: true
+      }
+    },
+    {
       path: '/form',
       name: 'form',
       component: ExternFormView,
     },
-    {
-      path: '/results',
-      name: 'results',
-      component: ExternFormResultView,
-    },
   ]
 })
+
+
+//Verifica se o user está logado antes de continuar
+router.beforeEach(async (to, from, next) => {
+
+  if(to.meta?.auth){
+
+      const auth = getAuth();
+
+      const checkAuth = () => {
+        return new Promise((resolve) => {
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          });
+        });
+      };
+
+      const isAuthenticated = await checkAuth();
+
+      if (isAuthenticated) {
+        return next();
+      } else {
+        return next({ name: 'login' });
+      }
+      
+  } else {
+    return next();
+  }
+
+})
+
 
 export default router

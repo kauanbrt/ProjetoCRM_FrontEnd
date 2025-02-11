@@ -1,14 +1,31 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { ref, onMounted } from 'vue';
+import { RouterView } from 'vue-router'
 import NavigationDrawer from './components/NavigationDrawer.vue';
 import AppBar from './components/AppBar.vue';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useAuthStore } from './stores/authStore';
+
+const isAuthenticated = ref(false);
 const authStore = useAuthStore();
+
+const auth = getAuth();
+
+onMounted(() => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setTimeout(() => {isAuthenticated.value = true;}, 500);
+      authStore.setUser(user);
+    } else {
+      setTimeout(() => {isAuthenticated.value = false;}, 500);
+    }
+  });
+});
 </script>
 
 <template>
-  <v-responsive class="border rounded">
-    <v-app v-if="authStore.isAuthenticated" style="height: 100% !important">
+  <v-responsive class="border rounded" v-if="isAuthenticated">
+    <v-app style="height: 100% !important">
       <NavigationDrawer />
 
       <AppBar />
@@ -21,13 +38,8 @@ const authStore = useAuthStore();
         </v-container>
       </v-main>
     </v-app>
-
-    <v-app v-else style="height: 100% !important">
-          <v-col class="pa-0">
-            <RouterView />
-          </v-col>
-    </v-app>
   </v-responsive>
+  <RouterView v-else />
 </template>
 
 <style scoped>

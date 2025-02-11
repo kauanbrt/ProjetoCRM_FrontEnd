@@ -1,6 +1,7 @@
 <script>
   import { STATUS_EMITIDO, STATUS_NAO_EMITIDO } from '@/constants/index';
   import Status from '@/components/Status.vue';
+  import axios from '@/services/http.js';
 
   export default {
     name: 'ParticipantView',
@@ -11,65 +12,32 @@
       return {
         search: '',
         dialog: false,
+        dialogDelete: false,
+        isEdit: false,
+        itemEditId: null,
+        itemDeleteId: null,
         allStatusTemplate: [],
-        items: [
-          {
-            nome: 'João Silva',
-            email: 'email@email.com',
-            telefone: '99999-9999',
-            ra: 9999999,
-            evento: 'Evento 1',
-            statusCertificado: 1,
-          },
-          {
-            nome: 'Pedro Moraes',
-            email: 'email@email.com',
-            telefone: '99999-9999',
-            ra: 9999999,
-            evento: 'Evento 1',
-            statusCertificado: 0,
-          },
-          {
-            nome: 'Laura Santana',
-            email: 'email@email.com',
-            telefone: '99999-9999',
-            ra: 9999999,
-            evento: 'Evento 2',
-            statusCertificado: 0,
-          },
-          {
-            nome: 'Maria Eduarda',
-            email: 'email@email.com',
-            telefone: '99999-9999',
-            ra: 9999999,
-            evento: 'Evento 3',
-            statusCertificado: 1,
-          },
-          {
-            nome: 'Luis Felipe',
-            email: 'email@email.com',
-            telefone: '99999-9999',
-            ra: 9999999,
-            evento: 'Evento 2',
-            statusCertificado: 0,
-          },
-        ],
+        items: [],
         params: {
-          nome: '',
-          ra: null,
-          evento: null,
-          statusCertificado: null
+          nome_participante: '',
+          email_participante: '',
+          tel_participante: '',
+          id_adm: 6,
+          isAluno: true,
+          RA_participante: '',
+          //verificar
+          id_evento: null
         }
       }
     },
     methods:{
       headers(){
         return [
-          { title: 'Nome',                            key: 'nome',                     align: 'start' },
-          { title: 'Email',                           key: 'email',                    align: 'start' },
-          { title: 'Telefone',                        key: 'telefone',                 align: 'start' },
-          { title: 'RA',                              key: 'ra',                       align: 'start' },
-          { title: 'Eventos',                         key: 'evento',                   align: 'start' },
+          { title: 'Nome',                            key: 'nome_participante',                     align: 'start' },
+          { title: 'Email',                           key: 'email_participante',                    align: 'start' },
+          { title: 'Telefone',                        key: 'tel_participante',                 align: 'start' },
+          { title: 'RA',                              key: 'RA_participante',                       align: 'start' },
+          { title: 'Eventos',                         key: 'eventos',                   align: 'start' },
           { title: 'Status do Último Certificado',    key: 'statusCertificado',        align: 'start' },
           { title: '',                                key: 'actions',                  align: 'start' },
         ]
@@ -80,32 +48,119 @@
         });
       },
       getStatusTemplate(statusId){
-      switch (statusId) {
-        case STATUS_NAO_EMITIDO:
-          return { 
-              text: "Não Emitido",
-              icon: "mdi-label",
-              color: "error"
-          }
-        
-        case STATUS_EMITIDO:
-          return { 
-              text: "Emitido",
-              icon: "mdi-label",
-              color: "success"
-          }
+        switch (statusId) {
+          case STATUS_NAO_EMITIDO:
+            return { 
+                text: "Não Emitido",
+                icon: "mdi-label",
+                color: "error"
+            }
+          
+          case STATUS_EMITIDO:
+            return { 
+                text: "Emitido",
+                icon: "mdi-label",
+                color: "success"
+            }
 
-        default:
-          return { 
-              text: "Indefinido",
-              icon: "mdi-label",
-              color: "grey"
-          }
+          default:
+            return { 
+                text: "Indefinido",
+                icon: "mdi-label",
+                color: "grey"
+            }
+        }
+      },
+      async getItems(){
+        await axios.get('/participantes').then(res => {
+          const { data } = res;
+          console.log(data)
+          this.items = data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      },
+      setItem(){
+
+        this.dialog = false;
+
+        if(this.isEdit){
+
+          axios.put(`/participantes/${this.itemEditId}`, this.params).then(res => {
+            this.$toast.success('Participante editado com sucesso!');
+            this.getItems();
+          })
+          .catch(err => {
+            console.log(err);
+            this.$toast.error('Erro ao editar Participante!');
+          });
+
+          return;
+        }
+
+        axios.post('/participantes', this.params).then(res => {
+          this.$toast.success('Participante cadastrado com sucesso!');
+          this.getItems();
+        })
+        .catch(err => {
+          console.log(err);
+          this.$toast.error('Erro ao cadastrar Participante!');
+        });
+
+        return;
+      },
+      openEditItem(item){
+
+        this.isEdit = true;
+        this.itemEditId = item.id_participante;
+
+        this.params.nome_participante = item.nome_participante;
+        this.params.email_participante = item.email_participante;
+        this.params.tel_participante = item.tel_participante;
+        this.params.id_adm = item.id_adm;
+        this.params.isAluno = item.isAluno;
+        this.params.RA_participante = item.RA_participante;
+
+        this.dialog = true;
+      },
+      confirmDelete(item){
+        this.itemDeleteId = item.id_participante;
+        this.dialogDelete = true;
+      },
+      deleteItem(){
+        axios.delete(`/participantes/${this.itemDeleteId}`).then(res => {
+          this.$toast.success('Participante excluído com sucesso!');
+          this.getItems();
+        })
+        .catch(err => {
+          console.log(err);
+          this.$toast.error('Erro ao excluir Participante!');
+        });
+
+        this.itemDeleteId = null;
+        this.dialogDelete = false;
+      },
+      closeModal(){
+        this.isEdit = false;
+        this.itemEditId = null;
+
+        this.params.nome_participante = '';
+        this.params.email_participante = '';
+        this.params.tel_participante = '';
+        this.params.id_adm = '';
+        this.params.isAluno = true;
+        this.params.RA_participante = '';
+
+        this.dialog = false;
+      },
+      handleTitleModal(){
+        return this.isEdit ? 'Editar Participante' : 'Cadastrar Participante';
       }
     },
-    created(){
+    async created(){
+      await this.getItems();
       this.getAllStatusTemplate();
-    }
     }
   }
 </script>
@@ -121,7 +176,7 @@
           <v-text-field
             v-model="search"
             density="compact"
-            label="Search"
+            label="Pesquisar"
             prepend-inner-icon="mdi-magnify"
             variant="solo-filled"
             flat
@@ -130,6 +185,40 @@
           ></v-text-field>
         </v-col>
         <v-col class="d-flex justify-end">
+
+          <!-- ========  MODAL CONFIRMAR EXCLUSÃO ======== -->
+          <v-dialog
+            v-model="dialogDelete"
+            max-width="400"
+            persistent
+          >
+            <v-card>
+
+              <v-card-title style="font-size: 1.2rem;">
+                <v-icon>mdi-delete</v-icon>
+                Excluir Item
+              </v-card-title>
+
+              <v-card-text style="font-size: 1.1rem;">
+                Você tem CERTEZA que deseja EXCLUIR este item? <br> Esta ação não poderá ser desfeita!
+              </v-card-text>
+
+              <template v-slot:actions>
+                <v-spacer></v-spacer>
+
+                <v-btn @click="dialogDelete = false" color="primary">
+                  Cancelar
+                </v-btn>
+
+                <v-btn @click="deleteItem" color="error">
+                  Confirmar
+                </v-btn>
+              </template>
+            </v-card>
+          </v-dialog>
+
+
+          <!-- ========  MODAL CADASTRO/EDIT ======== -->
           <v-dialog
             v-model="dialog"
             max-width="600"
@@ -146,7 +235,7 @@
 
             <v-card
               prepend-icon="mdi-account-group"
-              title="Cadastrar Participante"
+              :title="handleTitleModal()"
             >
               <v-card-text>
                 <v-row dense>
@@ -155,6 +244,7 @@
                     sm="6"
                   >
                     <v-text-field
+                      v-model="params.nome_participante"
                       label="Nome*"
                       required
                     ></v-text-field>
@@ -165,6 +255,7 @@
                     sm="6"
                   >
                     <v-text-field
+                      v-model="params.email_participante"
                       label="Email*"
                       required
                     ></v-text-field>
@@ -175,6 +266,7 @@
                     sm="6"
                   >
                     <v-text-field
+                      v-model="params.tel_participante"
                       label="Telefone*"
                       required
                     ></v-text-field>
@@ -185,6 +277,7 @@
                     sm="6"
                   >
                     <v-text-field
+                      v-model="params.RA_participante"
                       label="RA*"
                       required
                     ></v-text-field>
@@ -195,10 +288,19 @@
                     sm="6"
                   >
                     <v-text-field
+                      v-model="params.id_evento"
                       label="Evento*"
                       required
                     ></v-text-field>
                   </v-col>
+                </v-row>
+
+                <v-row dense>
+                    <v-col
+                        cols="12"
+                    >
+                        <v-checkbox v-model="params.isAluno" label="Sou aluno da UTFPR"></v-checkbox>
+                    </v-col>
                 </v-row>
 
                 <small class="text-caption text-medium-emphasis">*indica campos obrigatórios</small>
@@ -212,14 +314,14 @@
                 <v-btn
                   text="Cancelar"
                   variant="plain"
-                  @click="dialog = false"
+                  @click="closeModal"
                 ></v-btn>
 
                 <v-btn
                   color="primary"
                   text="Confirmar"
                   variant="tonal"
-                  @click="dialog = false"
+                  @click="setItem"
                 ></v-btn>
               </v-card-actions>
             </v-card>
@@ -250,6 +352,7 @@
                 color="orange-darken-2"
                 size="small"
                 style="color: #000 !important;"
+                @click="openEditItem(item)"
               >
                 <v-icon color="grey-darken-4">
                     mdi-pencil
@@ -269,6 +372,7 @@
                 size="small"
                 style="color: #000 !important;"
                 class="mx-1"
+                @click="confirmDelete(item)"
               >
                 <v-icon color="grey-darken-4">
                     mdi-delete

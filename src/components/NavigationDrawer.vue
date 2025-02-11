@@ -1,6 +1,9 @@
 <script>
+import { signOut } from "firebase/auth";
+import { useAuthStore } from "@/stores/authStore";
+import { auth } from "@/plugins/firebase";
+import router from "@/router";
 
-import { useAuthStore } from '@/stores/authStore';
   export default {
     name: 'NavigationDrawer',
     data () {
@@ -9,14 +12,45 @@ import { useAuthStore } from '@/stores/authStore';
         rail: false,
       }
     },
+    watch:{
+      'authStore.user': (newValue) => {
+        if(newValue == null){
+          router.push('/login');
+        }
+      }
+    },
     computed:{
       authStore(){
         return useAuthStore();
+      },
+      user(){
+        return auth?.currentUser;
       }
     },
     methods: {
       logout(){
-        this.authStore.setIsAutenticated(false);
+        signOut(auth).then(() => {
+          // Sign-out successful.
+          this.$toast.success('Usuário desconectado com sucesso!');
+          router.push('/login');
+        }).catch((error) => {
+          this.$toast.error('Erro ao desconectar usuário!');
+          // An error happened.
+        });
+      },
+      getUserInitials(){
+        console.log(this.user)
+        const userName = this.user?.email;
+
+        let strings = userName.split(' ');
+
+        let userInitials = strings[0].charAt(0);
+
+        if(strings.length >= 2){
+          userInitials += strings[1].charAt(0);
+        }
+
+        return userInitials.toUpperCase();
       }
     }
   }
@@ -31,16 +65,22 @@ import { useAuthStore } from '@/stores/authStore';
         @click="rail = false"
     >
         <v-list-item
-            prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
-            title="Aluno UTFPR"
-            height="64px"
-            nav
+          :title="user?.email"
+          height="64px"
+          nav
+          style="color: #FFF"
         >
+            <template v-slot:prepend>
+              <v-avatar color="#FF5733">
+                <span class="text-h6" style="color: #FFF">{{ getUserInitials() }}</span>
+              </v-avatar>
+            </template>
             <template v-slot:append>
                 <v-btn
                 icon="mdi-chevron-left"
                 variant="text"
                 @click.stop="rail = !rail"
+                color="#FFF"
                 ></v-btn>
             </template>
         </v-list-item>

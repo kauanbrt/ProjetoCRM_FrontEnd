@@ -1,74 +1,132 @@
 <script>
+  import axios from '@/services/http.js';
+  import { formatDateToUTC } from '@/services/utils.js';
+
   export default {
     name: 'EventView',
     data () {
       return {
         search: '',
         dialog: false,
-        items: [
-          {
-            nome: 'Evento 1',
-            descricao: 'Descrição do Evento',
-            dataInicio: '10-29-2024',
-            dataFim: '10-29-2024',
-            duracao: 2,
-            qtdParticipantes: 20,
-          },
-          {
-            nome: 'Evento 2',
-            descricao: 'Descrição do Evento',
-            dataInicio: '10-29-2024',
-            dataFim: '10-29-2024',
-            duracao: 2,
-            qtdParticipantes: 20,
-          },
-          {
-            nome: 'Evento 3',
-            descricao: 'Descrição do Evento',
-            dataInicio: '10-29-2024',
-            dataFim: '10-29-2024',
-            duracao: 2,
-            qtdParticipantes: 20,
-          },
-          {
-            nome: 'Evento 4',
-            descricao: 'Descrição do Evento',
-            dataInicio: '10-29-2024',
-            dataFim: '10-29-2024',
-            duracao: 2,
-            qtdParticipantes: 20,
-          },
-          {
-            nome: 'Evento 5',
-            descricao: 'Descrição do Evento',
-            dataInicio: '10-29-2024',
-            dataFim: '10-29-2024',
-            duracao: 2,
-            qtdParticipantes: 20,
-          },
-        ],
+        dialogDelete: false,
+        isEdit: false,
+        itemEditId: null,
+        itemDeleteId: null,
+        items: [],
         params: {
-          nome: '',
-          descricao: '',
-          dataInicio: '',
-          dataFim: '',
+          nome_evento: '',
+          descricao_evento: '',
+          data_inicio: null,
+          data_fim: null,
           duracao: null,
-          qtdParticipantes: null,
+          id_adm: 6, //todo recuperar do adm logado
         }
       }
     },
     methods:{
       headers(){
         return [
-          { title: 'Nome',                            key: 'nome',                align: 'start' },
-          { title: 'Descrição',                       key: 'descricao',           align: 'start' },
-          { title: 'Início',                          key: 'dataInicio',          align: 'start' },
-          { title: 'Fim',                             key: 'dataFim',             align: 'start' },
-          { title: 'Duração',                         key: 'duracao',             align: 'start' },
-          { title: 'Qtd de Participantes',            key: 'qtdParticipantes',    align: 'start' },
-          { title: '',                                key: 'actions',             align: 'center' },
+          { title: 'Nome',                            key: 'nome_evento',           align: 'start' },
+          { title: 'Descrição',                       key: 'descricao_evento',      align: 'start' },
+          { title: 'Início',                          key: 'data_inicio',           align: 'start' },
+          { title: 'Fim',                             key: 'data_fim',              align: 'start' },
+          { title: 'Duração',                         key: 'duracao',               align: 'start' },
+          { title: 'Qtd de Participantes',            key: 'qtd_participantes',     align: 'start' },
+          { title: '',                                key: 'actions',               align: 'center' },
         ]
       },
+      getItems(){
+        axios.get('/eventos').then(res => {
+          const { data } = res;
+          console.log(data)
+          this.items = data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      },
+      setItem(){
+        this.params.data_inicio = formatDateToUTC(this.params.data_inicio);
+        this.params.data_fim = formatDateToUTC(this.params.data_fim);
+
+        this.params.duracao = parseInt(this.params.duracao);
+
+        this.dialog = false;
+
+        if(this.isEdit){
+
+          axios.put(`/eventos/${this.itemEditId}`, this.params).then(res => {
+            this.$toast.success('Evento editado com sucesso!');
+            this.getItems();
+          })
+          .catch(err => {
+            console.log(err);
+            this.$toast.error('Erro ao editar Evento!');
+          });
+
+          return;
+        }
+
+        axios.post('/eventos', this.params).then(res => {
+          this.$toast.success('Evento cadastrado com sucesso!');
+          this.getItems();
+        })
+        .catch(err => {
+          console.log(err);
+          this.$toast.error('Erro ao cadastrar Evento!');
+        });
+
+        return;
+      },
+      openEditItem(item){
+        this.isEdit = true;
+        this.itemEditId = item.id_evento;
+
+        this.params.data_inicio = item.data_inicio;
+        this.params.data_fim = item.data_fim;
+        this.params.descricao_evento = item.descricao_evento;
+        this.params.duracao = item.duracao;
+        this.params.id_adm = item.id_adm;
+        this.params.nome_evento = item.nome_evento;
+
+        this.dialog = true;
+      },
+      confirmDelete(item){
+        this.itemDeleteId = item.id_evento;
+        this.dialogDelete = true;
+      },
+      deleteItem(){
+        axios.delete(`/eventos/${this.itemDeleteId}`).then(res => {
+          this.$toast.success('Evento excluído com sucesso!');
+          this.getItems();
+        })
+        .catch(err => {
+          console.log(err);
+          this.$toast.error('Erro ao excluir Evento!');
+        });
+
+        this.itemDeleteId = null;
+        this.dialogDelete = false;
+      },
+      closeModal(){
+        this.isEdit = false;
+        this.itemEditId = null;
+
+        this.params.data_inicio = null;
+        this.params.data_fim = null;
+        this.params.descricao_evento = '';
+        this.params.duracao = null;
+        this.params.id_adm = 6;
+        this.params.nome_evento = '';
+
+        this.dialog = false;
+      },
+      handleTitleModal(){
+        return this.isEdit ? 'Editar Evento' : 'Cadastrar Evento';
+      }
+    },
+    created(){
+      this.getItems();
     }
   }
 </script>
@@ -84,7 +142,7 @@
           <v-text-field
             v-model="search"
             density="compact"
-            label="Search"
+            label="Pesquisar"
             prepend-inner-icon="mdi-magnify"
             variant="solo-filled"
             flat
@@ -93,6 +151,40 @@
           ></v-text-field>
         </v-col>
         <v-col class="d-flex justify-end">
+
+          <!-- ========  MODAL CONFIRMAR EXCLUSÃO ======== -->
+          <v-dialog
+            v-model="dialogDelete"
+            max-width="400"
+            persistent
+          >
+            <v-card>
+
+              <v-card-title style="font-size: 1.2rem;">
+                <v-icon>mdi-delete</v-icon>
+                Excluir Item
+              </v-card-title>
+
+              <v-card-text style="font-size: 1.1rem;">
+                Você tem CERTEZA que deseja EXCLUIR este item? <br> Esta ação não poderá ser desfeita!
+              </v-card-text>
+
+              <template v-slot:actions>
+                <v-spacer></v-spacer>
+
+                <v-btn @click="dialogDelete = false" color="primary">
+                  Cancelar
+                </v-btn>
+
+                <v-btn @click="deleteItem" color="error">
+                  Confirmar
+                </v-btn>
+              </template>
+            </v-card>
+          </v-dialog>
+
+
+          <!-- ========  MODAL CADASTRO/EDIT ======== -->
           <v-dialog
             v-model="dialog"
             max-width="600"
@@ -109,7 +201,7 @@
 
             <v-card
               prepend-icon="mdi-calendar"
-              title="Cadastrar Evento"
+              :title="handleTitleModal()"
             >
               <v-card-text>
                 <v-row dense>
@@ -118,6 +210,7 @@
                     sm="6"
                   >
                     <v-text-field
+                      v-model="params.nome_evento"
                       label="Nome*"
                       required
                     ></v-text-field>
@@ -128,6 +221,7 @@
                     sm="6"
                   >
                     <v-date-input
+                      v-model="params.data_inicio"
                       label="Data início*"
                       required
                     ></v-date-input>
@@ -138,6 +232,7 @@
                     sm="6"
                   >
                     <v-text-field
+                    v-model="params.duracao"
                       label="Duração (horas)*"
                       required
                     ></v-text-field>
@@ -148,6 +243,7 @@
                     sm="6"
                   >
                     <v-date-input
+                    v-model="params.data_fim"
                       label="Data fim*"
                       required
                     ></v-date-input>
@@ -158,6 +254,7 @@
                   
                   >
                     <v-textarea
+                    v-model="params.descricao_evento"
                       label="Descrição*"
                       required
                     ></v-textarea>
@@ -176,14 +273,14 @@
                 <v-btn
                   text="Cancelar"
                   variant="plain"
-                  @click="dialog = false"
+                  @click="closeModal()"
                 ></v-btn>
 
                 <v-btn
                   color="primary"
                   text="Confirmar"
                   variant="tonal"
-                  @click="dialog = false"
+                  @click="setItem"
                 ></v-btn>
               </v-card-actions>
             </v-card>
@@ -263,6 +360,7 @@
                   size="small"
                   style="color: #000 !important;"
                   class="mx-1"
+                  @click="openEditItem(item)"
                 >
                   <v-icon color="grey-darken-4">
                       mdi-pencil
@@ -282,6 +380,7 @@
                   size="small"
                   style="color: #000 !important;"
                   class="mx-1"
+                  @click="confirmDelete(item)"
                 >
                   <v-icon color="grey-darken-4">
                       mdi-delete

@@ -2,6 +2,7 @@
   import { F_TIPO_FEEDBACK, F_TIPO_CADASTRO, F_STATUS_ATIVO, F_STATUS_DESATIVADO } from '@/constants/index';
   import Status from '@/components/Status.vue';
   import router from '@/router';
+  import axios from '@/services/http.js';
 
   export default {
     name: 'FormsView',
@@ -13,6 +14,10 @@
         F_STATUS_ATIVO: F_STATUS_ATIVO,
         search: '',
         dialog: false,
+        dialogDelete: false,
+        isEdit: false,
+        itemEditId: null,
+        itemDeleteId: null,
         allStatusTemplate: [],
         tiposFormulario: [
           { title: 'Cadastro', value: F_TIPO_CADASTRO },
@@ -40,11 +45,11 @@
           },
         ],
         params: {
-          id: null,
-          aluno_nome: '',
-          aluno_ra: null,
-          evento: '',
-          status: null,
+          id_adm: 6,
+          id_evento: null,
+          id_tipo: null,
+          nome_formulario: '',
+          status_formulario: F_STATUS_ATIVO,
         }
       }
     },
@@ -85,9 +90,8 @@
                 icon: "mdi-label",
                 color: "grey"
             }
-        
-      }
-    },
+        }
+      },
       getTipoTemplate(statusId){
         switch (statusId) {
           case F_TIPO_FEEDBACK:
@@ -110,16 +114,119 @@
                 icon: "mdi-label",
                 color: "grey"
             }
-        
+        }
+      },
+      viewResults(){
+        router.push('/results');
+      },
+      async getItems(){
+        await axios.get('/formularios').then(res => {
+          const { data } = res;
+          console.log(data)
+          this.items = data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      },
+      async getEventosToSelect(){
+
+        this.allEventos = [];
+
+        axios.get('/eventos').then(res => {
+          const { data } = res;
+          if(data.length){
+            data.forEach(evento => {
+              this.allEventos.push({ title: evento.nome_evento, value: evento.id_evento });
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      },
+      setItem(){
+
+        this.dialog = false;
+
+        console.log(this.params)
+
+        if(this.isEdit){
+
+          axios.put(`/formularios/${this.itemEditId}`, this.params).then(res => {
+            this.$toast.success('Formulário editado com sucesso!');
+            this.getItems();
+          })
+          .catch(err => {
+            console.log(err);
+            this.$toast.error('Erro ao editar Formulário!');
+          });
+
+          return;
+        }
+
+        axios.post('/formularios', this.params).then(res => {
+          this.$toast.success('Formulário cadastrado com sucesso!');
+          this.getItems();
+        })
+        .catch(err => {
+          console.log(err);
+          this.$toast.error('Erro ao cadastrar Formulário!');
+        });
+
+        return;
+      },
+      openEditItem(item){
+
+        this.isEdit = true;
+        this.itemEditId = item.id_formulario;
+
+        this.params.id_adm = item.id_adm;
+        this.params.id_evento = item.id_evento;
+        this.params.id_tipo = item.id_tipo;
+        this.params.nome_formulario = item.nome_formulario;
+        this.params.status_formulario = item.status_formulario;
+
+        this.dialog = true;
+      },
+      confirmDelete(item){
+        this.itemDeleteId = item.id_formulario;
+        this.dialogDelete = true;
+      },
+      deleteItem(){
+        axios.delete(`/formularios/${this.itemDeleteId}`).then(res => {
+          this.$toast.success('Formulário excluído com sucesso!');
+          this.getItems();
+        })
+        .catch(err => {
+          console.log(err);
+          this.$toast.error('Erro ao excluir Formulário!');
+        });
+
+        this.itemDeleteId = null;
+        this.dialogDelete = false;
+      },
+      closeModal(){
+        this.isEdit = false;
+        this.itemEditId = null;
+
+        this.params.id_adm = 6;
+        this.params.id_evento = null;
+        this.params.id_tipo = null;
+        this.params.nome_formulario = '';
+        this.params.status_formulario = this.F_STATUS_ATIVO;
+
+        this.dialog = false;
+      },
+      handleTitleModal(){
+        return this.isEdit ? 'Editar Formulário' : 'Cadastrar Formulário';
       }
     },
-    viewResults(){
-      router.push('/results');
+    async created(){
+      await this.getItems();
+      await this.getEventosToSelect();
+      this.getAllStatusTemplate();
     }
-  },
-  created(){
-    this.getAllStatusTemplate();
-  }
 
   }
 </script>
@@ -135,7 +242,7 @@
           <v-text-field
             v-model="search"
             density="compact"
-            label="Search"
+            label="Pesquisar"
             prepend-inner-icon="mdi-magnify"
             variant="solo-filled"
             flat
@@ -144,6 +251,39 @@
           ></v-text-field>
         </v-col>
         <v-col class="d-flex justify-end">
+
+          <!-- ========  MODAL CONFIRMAR EXCLUSÃO ======== -->
+          <v-dialog
+            v-model="dialogDelete"
+            max-width="400"
+            persistent
+          >
+            <v-card>
+
+              <v-card-title style="font-size: 1.2rem;">
+                <v-icon>mdi-delete</v-icon>
+                Excluir Item
+              </v-card-title>
+
+              <v-card-text style="font-size: 1.1rem;">
+                Você tem CERTEZA que deseja EXCLUIR este item? <br> Esta ação não poderá ser desfeita!
+              </v-card-text>
+
+              <template v-slot:actions>
+                <v-spacer></v-spacer>
+
+                <v-btn @click="dialogDelete = false" color="primary">
+                  Cancelar
+                </v-btn>
+
+                <v-btn @click="deleteItem" color="error">
+                  Confirmar
+                </v-btn>
+              </template>
+            </v-card>
+          </v-dialog>
+
+          <!-- ========  MODAL CADASTRO/EDIT ======== -->
           <v-dialog
             v-model="dialog"
             max-width="600"
@@ -152,7 +292,7 @@
               <v-btn
                 class="text-none font-weight-regular"
                 prepend-icon="mdi-plus"
-                text="Novo Formulário"
+                text="Cadastrar Formulário"
                 color="success"
                 v-bind="activatorProps"
               ></v-btn>
@@ -160,15 +300,27 @@
 
             <v-card
               prepend-icon="mdi-file-document"
-              title="Novo Formulário"
+              :title="handleTitleModal()"
             >
               <v-card-text>
                 <v-row dense>
                   <v-col
                     cols="12"
                   >
+                    <v-text-field
+                      v-model="params.nome_formulario"
+                      label="Nome do Fomulário*"
+                      required
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col
+                    cols="12"
+                  >
                     <v-select
                       label="Tipo*"
+                      v-model="params.id_tipo"
                       :items="tiposFormulario"
                       item-title="title"
                       item-value="value"
@@ -181,6 +333,7 @@
                     cols="12"
                   >
                     <v-select
+                      v-model="params.id_evento"
                       label="Evento*"
                       :items="allEventos"
                       item-title="title"
@@ -201,14 +354,14 @@
                 <v-btn
                   text="Cancelar"
                   variant="plain"
-                  @click="dialog = false"
+                  @click="closeModal"
                 ></v-btn>
 
                 <v-btn
                   color="primary"
                   text="Confirmar"
                   variant="tonal"
-                  @click="dialog = false"
+                  @click="setItem"
                 ></v-btn>
               </v-card-actions>
             </v-card>
@@ -264,6 +417,7 @@
                 size="small"
                 style="color: #000 !important;"
                 class="mx-1"
+                @click="confirmDelete(item)"
               >
                 <v-icon color="grey-darken-4">
                     mdi-delete

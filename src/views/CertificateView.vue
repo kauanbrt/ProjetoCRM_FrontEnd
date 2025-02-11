@@ -1,6 +1,7 @@
 <script>
   import { STATUS_ENVIADO, STATUS_NAO_ENVIADO } from '@/constants/index';
   import Status from '@/components/Status.vue';
+  import axios from '@/services/http.js';
 
   export default {
     name: 'CertificateView',
@@ -54,32 +55,43 @@
         });
       },
       getStatusTemplate(statusId){
-      switch (statusId) {
-        case STATUS_NAO_ENVIADO:
-          return { 
-              text: "Não Emitido",
-              icon: "mdi-label",
-              color: "error"
-          }
-        
-        case STATUS_ENVIADO:
-          return { 
-              text: "Emitido",
-              icon: "mdi-label",
-              color: "success"
-          }
+        switch (statusId) {
+          case STATUS_NAO_ENVIADO:
+            return { 
+                text: "Não Emitido",
+                icon: "mdi-label",
+                color: "error"
+            }
+          
+          case STATUS_ENVIADO:
+            return { 
+                text: "Emitido",
+                icon: "mdi-label",
+                color: "success"
+            }
 
-        default:
-          return { 
-              text: "Indefinido",
-              icon: "mdi-label",
-              color: "grey"
-          }
-      }
+          default:
+            return { 
+                text: "Indefinido",
+                icon: "mdi-label",
+                color: "grey"
+            }
+        }
+      },
+      async getItems(){
+        await axios.get('/certificados').then(res => {
+          const { data } = res;
+          console.log(data)
+          this.items = data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      },
     },
-    created(){
+    async created(){
+      await this.getItems();
       this.getAllStatusTemplate();
-    }
     }
   }
 </script>
@@ -95,7 +107,7 @@
           <v-text-field
             v-model="search"
             density="compact"
-            label="Search"
+            label="Pesquisar"
             prepend-inner-icon="mdi-magnify"
             variant="solo-filled"
             flat

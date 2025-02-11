@@ -1,13 +1,27 @@
-import { ref, computed, reactive } from 'vue'
-import { defineStore } from 'pinia'
+import { ref,  } from 'vue';
+import { defineStore } from 'pinia';
+import { auth } from '@/plugins/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+
 
 export const useAuthStore = defineStore('auth', () => {
 
-  const isAuthenticated = ref(false);
+    const user = ref(null);
+    const loading = ref(true);
 
-  function setIsAutenticated(value) {
-    isAuthenticated.value = value;
-  }
+    async function setUser(userValue) {
+        user.value = userValue;
+    }
 
-  return { isAuthenticated, setIsAutenticated };
+    onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      loading.value = false;
+    });
+    
+    return {
+        user,
+        loading,
+        setUser,
+    }
+
 })

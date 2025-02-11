@@ -9,5 +9,5 @@ export const F_TIPO_FEEDBACK = 1;
 export const F_TIPO_CADASTRO = 2;
 
 //Status Formulario
-export const F_STATUS_DESATIVADO = 0;
-export const F_STATUS_ATIVO = 1;
+export const F_STATUS_DESATIVADO = false;
+export const F_STATUS_ATIVO = true;

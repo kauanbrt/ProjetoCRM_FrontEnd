@@ -1,7 +1,10 @@
 <script>
 import { useAuthStore } from '@/stores/authStore';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/plugins/firebase";
 import router from '@/router';
-import logo from '@/assets/logo_horizontal.jpg'
+import logo from '@/assets/logo_horizontal.jpg';
+
 export default {
   name: 'LoginView',
   data() {
@@ -20,10 +23,23 @@ export default {
     }
   },
   methods: {
-    submit(){
-        this.authStore.setIsAutenticated(true);
-        router.push('/');
-    }
+    async submit(){
+      try{
+          await signInWithEmailAndPassword(auth, this.params.email, this.params.password)
+          .then(async (userCredential) => {
+              this.$toast.success('Usuário logado com sucesso!');
+              await this.authStore.setUser(userCredential.user);
+              router.push('/');
+          })
+          .catch((error) => {
+              this.$toast.error(`Erro ao autenticar usuário!`);
+              console.log(errorMessage);
+          });
+
+      } catch (error) {
+        toaster.error(error?.response?.data);
+      }
+    },
   },
   created() {
   },

@@ -158,7 +158,7 @@
           <v-text-field
             v-model="search"
             density="compact"
-            label="Search"
+            label="Pesquisar"
             prepend-inner-icon="mdi-magnify"
             variant="solo-filled"
             flat
